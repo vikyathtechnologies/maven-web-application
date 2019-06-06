@@ -1,0 +1,25 @@
+node{
+    
+    def mvnHome = tool name: 'maven3.6.1', type: 'maven'
+    stage('checkoutcode'){
+        git credentialsId: 'ace6eae9-c550-4e06-a974-43075450a14f', url: 'https://github.com/vikyathtechnologies/maven-web-application.git'
+    }
+    
+    stage('Build'){
+        sh "${mvnHome}/bin/mvn clean package"
+    }
+    
+    stage('Deploytocontainer'){
+        sshagent(['tomcat']) {
+    // some block
+    
+    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.126.181.102:/opt/apache-tomcat-9.0.20/webapps/maven-web-application.war"
+}
+        
+    }
+    
+    stage('mailnotification'){
+        emailext body: 'Build status', replyTo: 'roja.jk@gmail.com', subject: 'Build', to: 'roja.jk@gmail.com roja.qa1@gmail.com aftngt222@gmail.com'
+    }
+    
+}
